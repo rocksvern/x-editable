@@ -3,3 +3,5 @@ test/instrumented/
 *.nupkg
 *.orig
 /roadmap.txt
+README.md
+package.json
