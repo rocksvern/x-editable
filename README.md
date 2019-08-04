@@ -1,6 +1,9 @@
 # X-editable
 In-place editing with Twitter Bootstrap, jQuery UI or pure jQuery.  
 
+# About this fork
+This fork only try to fix the issue with selec2 and bootstrap-table.
+
 ## Contents
  * [Live Demo](#live-demo)
  * [Installation](#installation)
