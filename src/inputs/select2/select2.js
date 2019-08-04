@@ -242,7 +242,8 @@ $(function(){
        },
        
        input2value: function() { 
-           return this.$input.select2('val');
+           //from doc https://select2.org/programmatic-control/retrieving-selections change 'val' for 'data'   
+           return this.$input.select2('data');
        },
 
        str2value: function(str, separator) {
