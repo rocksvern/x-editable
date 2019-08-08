@@ -81,7 +81,7 @@ $(function(){
 **/
 (function ($) {
     "use strict";
-    
+
     var Constructor = function (options) {
         this.init('select2', options, Constructor.defaults);
 
@@ -90,26 +90,26 @@ $(function(){
         this.sourceData = null;
 
         //placeholder
-        if(options.placeholder) {
+        if (options.placeholder) {
             options.select2.placeholder = options.placeholder;
         }
-       
+
         //if not `tags` mode, use source
-        if(!options.select2.tags && options.source) {
+        if (!options.select2.tags && options.source) {
             var source = options.source;
             //if source is function, call it (once!)
             if ($.isFunction(options.source)) {
                 source = options.source.call(options.scope);
-            }               
+            }
 
             if (typeof source === 'string') {
                 options.select2.ajax = options.select2.ajax || {};
                 //some default ajax params
-                if(!options.select2.ajax.data) {
-                    options.select2.ajax.data = function(term) {return { query:term };};
+                if (!options.select2.ajax.data) {
+                    options.select2.ajax.data = function (term) { return { query: term }; };
                 }
-                if(!options.select2.ajax.results) {
-                    options.select2.ajax.results = function(data) { return {results:data };};
+                if (!options.select2.ajax.results) {
+                    options.select2.ajax.results = function (data) { return { results: data }; };
                 }
                 options.select2.ajax.url = source;
             } else {
@@ -117,7 +117,7 @@ $(function(){
                 this.sourceData = this.convertSource(source);
                 options.select2.data = this.sourceData;
             }
-        } 
+        }
 
         //overriding objects in config (as by default jQuery extend() is not recursive)
         this.options.select2 = $.extend({}, Constructor.defaults.select2, options.select2);
@@ -129,14 +129,14 @@ $(function(){
         //store function returning ID of item
         //should be here as used inautotext for local source
         this.idFunc = this.options.select2.id;
-        if (typeof(this.idFunc) !== "function") {
+        if (typeof (this.idFunc) !== "function") {
             var idKey = this.idFunc || 'id';
             this.idFunc = function (e) { return e[idKey]; };
         }
 
         //store function that renders text in select2
         this.formatSelection = this.options.select2.formatSelection;
-        if (typeof(this.formatSelection) !== "function") {
+        if (typeof (this.formatSelection) !== "function") {
             this.formatSelection = function (e) { return e.text; };
         }
     };
@@ -144,7 +144,7 @@ $(function(){
     $.fn.editableutils.inherit(Constructor, $.fn.editabletypes.abstractinput);
 
     $.extend(Constructor.prototype, {
-        render: function() {
+        render: function () {
             this.setClass();
 
             //can not apply select2 here as it calls initSelection 
@@ -153,101 +153,105 @@ $(function(){
             //this.$input.select2(this.options.select2);
 
             //when data is loaded via ajax, we need to know when it's done to populate listData
-            if(this.isRemote) {
+            if (this.isRemote) {
                 //listen to loaded event to populate data
-                this.$input.on('select2-loaded', $.proxy(function(e) {
+                this.$input.on('select2-loaded', $.proxy(function (e) {
                     this.sourceData = e.items.results;
                 }, this));
             }
 
             //trigger resize of editableform to re-position container in multi-valued mode
-            if(this.isMultiple) {
-               this.$input.on('change', function() {
-                   $(this).closest('form').parent().triggerHandler('resize');
-               });
+            if (this.isMultiple) {
+                this.$input.on('change', function () {
+                    $(this).closest('form').parent().triggerHandler('resize');
+                });
             }
-       },
+        },
 
-       value2html: function(value, element) {
-           var text = '', data,
-               that = this;
+        value2html: function (value, element) {
+            var text = '', data,
+                that = this;
 
-           if(this.options.select2.tags) { //in tags mode just assign value
-              data = value; 
-              //data = $.fn.editableutils.itemsByValue(value, this.options.select2.tags, this.idFunc);
-           } else if(this.sourceData) {
-              data = $.fn.editableutils.itemsByValue(value, this.sourceData, this.idFunc); 
-           } else {
-              //can not get list of possible values 
-              //(e.g. autotext for select2 with ajax source)
-           }
+            if (this.options.select2.tags) { //in tags mode just assign value
+                data = value;
+                //data = $.fn.editableutils.itemsByValue(value, this.options.select2.tags, this.idFunc);
+            } else if (this.sourceData) {
+                data = $.fn.editableutils.itemsByValue(value, this.sourceData, this.idFunc);
+            } else {
+                //can not get list of possible values 
+                //(e.g. autotext for select2 with ajax source)
+                if (this.isRemote) {
+                    var aux = value.split('|');
+                    data = [{ id: aux[0], text: aux[1] }];
+                }
+            }
 
-           //data may be array (when multiple values allowed)
-           if($.isArray(data)) {
-               //collect selected data and show with separator
-               text = [];
-               $.each(data, function(k, v){
-                   text.push(v && typeof v === 'object' ? that.formatSelection(v) : v);
-               });
-           } else if(data) {
-               text = that.formatSelection(data);
-           }
+            //data may be array (when multiple values allowed)
+            if ($.isArray(data)) {
+                //collect selected data and show with separator
+                text = [];
+                $.each(data, function (k, v) {
+                    text.push(v && typeof v === 'object' ? that.formatSelection(v) : v);
+                });
+            } else if (data) {
+                text = that.formatSelection(data);
+            }
 
-           text = $.isArray(text) ? text.join(this.options.viewseparator) : text;
+            text = $.isArray(text) ? text.join(this.options.viewseparator) : text;
 
-           //$(element).text(text);
-           Constructor.superclass.value2html.call(this, text, element); 
-       },
+            //$(element).text(text);
+            Constructor.superclass.value2html.call(this, text, element);
+        },
 
-       html2value: function(html) {
-           return this.options.select2.tags ? this.str2value(html, this.options.viewseparator) : null;
-       },
+        html2value: function (html) {
+            return this.options.select2.tags ? this.str2value(html, this.options.viewseparator) : null;
+        },
 
-       value2input: function(value) {
-           // if value array => join it anyway
-           if($.isArray(value)) {
-              value = value.join(this.getSeparator());
-           }
+        value2input: function (value) {
+            // if value array => join it anyway
+            if ($.isArray(value)) {
+                value = value.join(this.getSeparator());
+            }
 
-           //for remote source just set value, text is updated by initSelection
-           if(!this.$input.data('select2')) {
-               this.$input.val(value);
-               this.$input.select2(this.options.select2);
-           } else {
-               //second argument needed to separate initial change from user's click (for autosubmit)   
-               this.$input.val(value).trigger('change', true); 
+            //for remote source just set value, text is updated by initSelection
+            if (!this.$input.data('select2')) {
+                this.$input.val(value);
+                this.$input.select2(this.options.select2);
+            } else {
+                //second argument needed to separate initial change from user's click (for autosubmit)   
+                this.$input.val(value).trigger('change', true);
 
-               //Uncaught Error: cannot call val() if initSelection() is not defined
-               //this.$input.select2('val', value);
-           }
+                //Uncaught Error: cannot call val() if initSelection() is not defined
+                //this.$input.select2('val', value);
+            }
 
-           // if defined remote source AND no multiple mode AND no user's initSelection provided --> 
-           // we should somehow get text for provided id.
-           // The solution is to use element's text as text for that id (exclude empty)
-           if(this.isRemote && !this.isMultiple && !this.options.select2.initSelection) {
-               // customId and customText are methods to extract `id` and `text` from data object
-               // we can use this workaround only if user did not define these methods
-               // otherwise we cant construct data object
-               var customId = this.options.select2.id,
-                   customText = this.options.select2.formatSelection;
+            // if defined remote source AND no multiple mode AND no user's initSelection provided --> 
+            // we should somehow get text for provided id.
+            // The solution is to use element's text as text for that id (exclude empty)
+            if (this.isRemote && !this.isMultiple && !this.options.select2.initSelection) {
+                // customId and customText are methods to extract `id` and `text` from data object
+                // we can use this workaround only if user did not define these methods
+                // otherwise we cant construct data object
+                var customId = this.options.select2.id,
+                    customText = this.options.select2.formatSelection;
 
-               if(!customId && !customText) {
-                   var $el = $(this.options.scope);
-                   if (!$el.data('editable').isEmpty) {
-                       var data = {id: value, text: $el.text()};
-                       this.$input.select2('data', data); 
-                   }
-               }
-           }
-       },
-       
-       input2value: function() { 
-           //from doc https://select2.org/programmatic-control/retrieving-selections change 'val' for 'data'   
-           return this.$input.select2('data');
-       },
+                if (!customId && !customText) {
+                    var $el = $(this.options.scope);
+                    if (!$el.data('editable').isEmpty) {
+                        var data = { id: value, text: $el.text() };
+                        this.$input.select2('data', data);
+                    }
+                }
+            }
+        },
 
-       str2value: function(str, separator) {
-            if(typeof str !== 'string' || !this.isMultiple) {
+        input2value: function () {
+            //from doc https://select2.org/programmatic-control/retrieving-selections change 'val' for 'data'   
+            return this.isRemote?this.$input.select2('data')[0].id+'|'+this.$input.select2('data')[0].text:this.$input.select2('val');
+        },
+
+        str2value: function (str, separator) {
+            if (typeof str !== 'string' || !this.isMultiple) {
                 return str;
             }
 
@@ -264,17 +268,17 @@ $(function(){
             }
 
             return val;
-       },
+        },
 
-        autosubmit: function() {
-            this.$input.on('change', function(e, isInitial){
-                if(!isInitial) {
-                  $(this).closest('form').submit();
+        autosubmit: function () {
+            this.$input.on('change', function (e, isInitial) {
+                if (!isInitial) {
+                    $(this).closest('form').submit();
                 }
             });
         },
 
-        getSeparator: function() {
+        getSeparator: function () {
             return this.options.select2.separator || $.fn.select2.defaults.separator;
         },
 
@@ -282,10 +286,10 @@ $(function(){
         Converts source from x-editable format: {value: 1, text: "1"} to
         select2 format: {id: 1, text: "1"}
         */
-        convertSource: function(source) {
-            if($.isArray(source) && source.length && source[0].value !== undefined) {
-                for(var i = 0; i<source.length; i++) {
-                    if(source[i].value !== undefined) {
+        convertSource: function (source) {
+            if ($.isArray(source) && source.length && source[0].value !== undefined) {
+                for (var i = 0; i < source.length; i++) {
+                    if (source[i].value !== undefined) {
                         source[i].id = source[i].value;
                         delete source[i].value;
                     }
@@ -295,18 +299,18 @@ $(function(){
         },
 
         // see: https://github.com/vitalets/x-editable/pull/953
-        activate: function() {
+        activate: function () {
             this.$input.select2('focus');
         },
-        
-        destroy: function() {
-            if(this.$input) {
-                if(this.$input.data('select2')) {
+
+        destroy: function () {
+            if (this.$input) {
+                if (this.$input.data('select2')) {
                     this.$input.select2('destroy');
                 }
             }
         }
-        
+
     });
 
     Constructor.defaults = $.extend({}, $.fn.editabletypes.abstractinput.defaults, {
@@ -314,7 +318,7 @@ $(function(){
         @property tpl 
         @default <input type="hidden">
         **/
-        tpl:'<input type="hidden">',
+        tpl: '<input type="hidden">',
         /**
         Configuration of select2. [Full list of options](http://ivaynberg.github.com/select2).
 
