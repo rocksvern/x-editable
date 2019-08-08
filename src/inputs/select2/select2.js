@@ -182,7 +182,7 @@ $(function(){
                 //(e.g. autotext for select2 with ajax source)
                 if (this.isRemote) {
                     var aux = value.split('|');
-                    data = [{ id: aux[0], text: aux[1] }];
+                    data = [{ id: aux[0], text: aux[1] }]; 
                 }
             }
 
@@ -247,7 +247,7 @@ $(function(){
 
         input2value: function () {
             //from doc https://select2.org/programmatic-control/retrieving-selections change 'val' for 'data'   
-            return this.isRemote?this.$input.select2('data')[0].id+'|'+this.$input.select2('data')[0].text:this.$input.select2('val');
+            return this.isRemote?this.$input.select2('data')[0].id+'|'+this.$input.select2('data')[0].text:this.$input.select2('val'); 
         },
 
         str2value: function (str, separator) {
